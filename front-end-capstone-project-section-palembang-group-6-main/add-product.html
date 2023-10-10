@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Scent Zone</title>
+
+		<!--my style-->
+		<link rel="stylesheet" href="./css/add-product.css" />
+		<link rel="stylesheet" href="./css/home.css" />
+		<!--Feather Icons-->
+		<link
+			href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css"
+			rel="stylesheet"
+		/>
+	</head>
+	<body>
+		<!--Navbar Start-->
+		<section id="header">
+			<a href="#"><img src="./images/logo.png" /></a>
+
+			<div>
+				<ul id="navbar">
+					<li><a class="active" href="home.html">Home</a></li>
+					<li><a href="shop.html">Shop</a></li>
+					<li><a href="about.html">About</a></li>
+					<li>
+						<a href="add-product.html" id="add-product-link">Add Product</a>
+					</li>
+					<a href="login.html" id="login-button"
+						><button class="normal">Login</button></a
+					>
+				</ul>
+			</div>
+			<div id="user-profile" class="d-none"></div>
+		</section>
+		<!--Navbar End-->
+		<div class="container">
+			<h2>Add New Parfume Product</h2>
+			<form id="product-form">
+				<div class="form-container">
+					<div class="wrapper">
+						<div class="input-group">
+							<input id="title" type="text" required />
+							<label for="title">Product Title</label>
+							<i class="bx bxs-package"></i>
+						</div>
+						<div class="input-group">
+							<input id="description" type="text" required />
+							<label for="description">Description</label>
+							<i class="bx bxs-notepad"></i>
+						</div>
+						<div class="input-group">
+							<input id="image" type="file" required />
+
+							<i class="bx bxs-file"></i>
+						</div>
+						<div class="input-group">
+							<input id="price" type="text" required />
+							<label for="price">Price</label>
+							<i class="bx bxs-notepad"></i>
+						</div>
+						<button type="button" class="btn" onclick="createProduct()">
+							Submit Product
+						</button>
+					</div>
+				</div>
+			</form>
+		</div>
+
+		<!--footer Start-->
+		<footer class="section-p1">
+			<div class="col">
+				<img class="logo" src="./images/logo.png" />
+				<h4>Contact</h4>
+				<p><strong>Adress:</strong>Gedung Menara Rajawali, DKI JAKARTA</p>
+				<p><strong>Phone:</strong>0813-9910-0086</p>
+				<p><strong>Hours:</strong>10:00 - 18:00, Mon - Sat</p>
+				<div class="follow">
+					<h4>Follow us</h4>
+					<div class="icon">
+						<i class="bx bxl-facebook"></i>
+						<i class="bx bxl-twitter"></i>
+						<i class="bx bxl-instagram"></i>
+					</div>
+				</div>
+			</div>
+
+			<div class="col">
+				<h4>About</h4>
+				<a href="#">About us</a>
+				<a href="#">Contact us</a>
+			</div>
+
+			<div class="col">
+				<h4>My Account</h4>
+				<a href="#">Login</a>
+				<a href="#">My Wishlist</a>
+			</div>
+
+			<div class="copyright">
+				<p>2023 Scent Zone, All right reserved</p>
+			</div>
+		</footer>
+		<!--footer End-->
+		<!--My Javascript-->
+		<script src="js/home.js"></script>
+		<script>
+			const productsContainer = document.getElementById("products-container");
+			const loginButton = document.getElementById("login-button");
+			const token = localStorage.getItem("token");
+			const userProfile = document.getElementById("user-profile");
+
+			const addProductLink = document.getElementById("add-product-link");
+
+			if (token) {
+				userProfile.classList.remove("d-none");
+				loginButton.classList.add("d-none");
+			} else {
+				loginButton.classList.remove("d-none");
+				userProfile.classList.add("d-none");
+				addProductLink.classList.add("d-none");
+			}
+
+			const getUserProfile = async () => {
+				const response = await fetch("http://localhost:3000/api/user", {
+					headers: {
+						Authorization: `Bearer ${localStorage.getItem("token")}`,
+					},
+				});
+				const { result } = await response.json();
+
+				const p = document.createElement("p");
+				const b = document.createElement("button");
+				p.innerText = `Welcome, ${result.username}`;
+				b.innerText = "Logout";
+				b.classList.add("logout-btn");
+				userProfile.append(p);
+				userProfile.append(b);
+				b.addEventListener("click", () => {
+					localStorage.removeItem("token");
+					const { protocol, host, pathname } = window.location;
+					const path = pathname.split("/")[1];
+
+					window.location.href = `${protocol}//${host}/${path}/home.html`;
+				});
+			};
+
+			function createProduct() {
+				const title = document.getElementById("title").value;
+				const description = document.getElementById("description").value;
+				const image = document.getElementById("image").files[0]; // Get the selected file
+				const price = document.getElementById("price").value;
+
+				const formData = new FormData();
+				formData.append("title", title);
+				formData.append("description", description);
+				formData.append("image", image);
+				formData.append("price", price);
+
+				console.log(formData);
+
+				fetch("http://localhost:3000/api/products", {
+					method: "POST",
+					headers: {
+						Authorization: `Bearer ${localStorage.getItem("token")}`,
+					},
+					body: formData,
+				})
+					.then((response) => {
+						if (response.ok) {
+							alert("Product added successfully");
+							// You can redirect or perform other actions after successful submission
+						} else {
+							console.error("Error adding product:", response.statusText);
+						}
+					})
+					.catch((error) => {
+						console.error("An error occurred:", error);
+					});
+			}
+
+			if (token) {
+				getUserProfile();
+			}
+
+			window.addEventListener("DOMContentLoaded", () => {
+				const token = localStorage.getItem("token");
+				if (!token) {
+					const { protocol, host, pathname } = window.location;
+					const path = pathname.split("/")[1];
+
+					window.location.href = `${protocol}//${host}/${path}/home.html`;
+				}
+			});
+		</script>
+	</body>
+</html>

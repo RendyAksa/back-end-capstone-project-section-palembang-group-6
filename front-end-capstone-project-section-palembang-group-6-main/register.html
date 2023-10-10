@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Scent Zone</title>
+
+		<!--Feather Icons-->
+		<link
+			href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css"
+			rel="stylesheet"
+		/>
+
+		<!--my style-->
+		<link rel="stylesheet" href="./css/account.css" />
+	</head>
+	<body>
+		<div class="wrapper">
+			<div class="form-wrapper">
+				<form action="">
+					<h2>Sign Up</h2>
+					<div class="input-group">
+						<input id="username" type="text" required />
+						<label for="">Username</label>
+						<i class="bx bxs-user"></i>
+					</div>
+					<div class="input-group">
+						<input id="email" type="email" required />
+						<label for="">Email</label>
+						<i class="bx bxs-envelope"></i>
+					</div>
+					<div class="input-group">
+						<input id="password" type="password" required />
+						<label for="">Password</label>
+						<i class="bx bxs-lock-alt"></i>
+					</div>
+
+					<button type="button" class="btn" onclick="submitRegister()">
+						Sign Up
+					</button>
+
+					<div class="sign-link">
+						<p>
+							Already have an account?
+							<a href="./login.html" class="signIn-link"> Sign In </a>
+						</p>
+					</div>
+				</form>
+			</div>
+		</div>
+
+		<!--My Javascript-->
+		<script src="js/account.js"></script>
+		<script>
+			window.addEventListener("DOMContentLoaded", () => {
+				const token = localStorage.getItem("token");
+				if (token) {
+					const { protocol, host, pathname } = window.location;
+					const path = pathname.split("/")[1];
+
+					window.location.href = `${protocol}//${host}/${path}/home.html`;
+				}
+			});
+
+			const username = document.getElementById("username");
+			const email = document.getElementById("email");
+			const password = document.getElementById("password");
+
+			async function submitRegister() {
+				const userData = {
+					username: username.value,
+					email: email.value,
+					password: password.value,
+				};
+
+				try {
+					const response = await fetch("http://localhost:3000/api/register", {
+						method: "POST",
+						headers: {
+							"Content-Type": "application/json",
+						},
+						body: JSON.stringify(userData),
+					});
+
+					if (response.ok) {
+						alert("Registration successfully");
+						const { protocol, host, pathname } = window.location;
+						const path = pathname.split("/")[1];
+
+						window.location.href = `${protocol}//${host}/${path}/login.html`;
+					} else {
+						// Failed login
+						console.error("Login failed");
+					}
+				} catch (error) {
+					console.error("An error occurred", error);
+				}
+			}
+		</script>
+	</body>
+</html>
